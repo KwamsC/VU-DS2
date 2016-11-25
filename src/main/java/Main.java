@@ -17,8 +17,8 @@ public class Main implements DS2Interface {
     		return 0;
     	}		
     	int q=Integer.MIN_VALUE;
-    	for(int i=1;i<n;i++){	// for i to n, decide optimal solution by choosing to cut or not
-			q = Math.max(q, input[i] + rodcut(input, n-i)); // 2 choice up to n, so 2^n
+    	for(int i=1;i<n;i++){	// for i to n-1, decide optimal solution by choosing to cut or not
+			q = Math.max(q, input[i] + rodcut(input, n-i)); // 2 choice up to n-1, so 2^n
     	}
     	return q;	
 	}
@@ -40,7 +40,6 @@ public class Main implements DS2Interface {
     	return result[m]; 			// returns the last index of new array, which is optimal solution
     }
 
-
     @Override
     public int matrix(int[][] input) {
     	int rows=input.length;
@@ -61,7 +60,7 @@ public class Main implements DS2Interface {
 
 	private int maxSumHorizontal(int[][] input, int rows, int columns) {
 		
-		int max;
+		int max=0;
 		int [][]tempMax = new int[rows][columns];
 		tempMax[0][0] = Math.max(input[0][0],0);
 		max=tempMax[0][0];
