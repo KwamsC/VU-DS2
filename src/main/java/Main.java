@@ -33,7 +33,7 @@ public class Main implements DS2Interface {
     	for(int j=1;j<=m;j++){		
     		int q=Integer.MIN_VALUE; //assign minimum integer to q				
     		for (int i=1; i<j; i++){
-    			q= Math.max(q, input[i] + result[j - i]); //j to n, j times to check optimal solution= n^2
+    			q= Math.max(q, input[i] + result[j - i]); //j to m, j times to check optimal solution= n^2
     			result[j]= q;		// Store the result of subproblem in an array and use it fur­ther rather than solv­ing it again(dynamic)
     		}
     	}
@@ -43,48 +43,154 @@ public class Main implements DS2Interface {
     @Override
     public int matrix(int[][] input) {
     	int rows=input.length;
-    	int columns=input[0].length;
-    	if (rows<1 || columns<1){
+    	int columns=rows;
+    	//declare the length of rows and columns with property matrix = n x n
+    	
+    	int maxSum=0;	//initialize maxSum at 0
+    	
+    	if(input==null || input.length==0){
     		return 0;
     	}
-    	int maxSum=0;
+    	// if there are no elements in the array, return 0
+
+    	int h = maxSumHorizontal(input, rows, columns); 
+    	int v = maxSumVertical(input, rows, columns);	
+    	int d = maxSumDiagonal(input, rows, columns);	 
+    	int c = maxSumADiagonal(input, rows, columns); 
+    	//create functions for MaxSum of every direction 
     	
-    	int h = maxSumHorizontal(input, rows, columns);
-    	int v = maxSumVertical(input, rows, columns);
-    	int d = maxSumDiagonal(input, rows, columns);
-    	int c = maxSumAntiDiagonal(input, rows, columns);
-    	
-    	maxSum=h+v+d+c;	
-		return maxSum; 
+    	return maxSum=h+v+d+c;						// returns maxSum, all the maxSum-directions combined!	 						
     }
 
-	private int maxSumHorizontal(int[][] input, int rows, int columns) {
+	private int maxSumHorizontal(int[][] input, int rows, int columns) {	
+		int maxSumH=0;	// initialize maxSum horizontal at 0
+		int [] horizontal = new int[columns]; //make a horizontal array where you save the Max values 
+		int [] tempMax = new int[columns];	//make a temporary array where you save the result
 		
-		int max=0;
-		int [][]tempMax = new int[rows][columns];
-		tempMax[0][0] = Math.max(input[0][0],0);
-		max=tempMax[0][0];
-		for(int r=0; r<rows; r++){
-			for (int c=1; c<columns; c++){
-				tempMax [r][c]=Math.max(0, tempMax[r][c-1]+input[r][c]);
-				max=Math.max(max,tempMax [r][c]);
+		//loop through matrix
+		for(int r=0; r<rows; r++){	
+			int max=0;				//for every row initialize new max 
+			tempMax[0] = Math.max(input[r][0],0);	//for every first element of every row, check max compared to 0
+			max=tempMax[0];
+			for (int c=1; c<columns; c++){			
+				tempMax[c]=Math.max(0, tempMax[c-1]+input[r][c]);	// from column 1 to last column (nested for loop n^2), save subresult in temporary array(dynamic)
+				max=Math.max(max,tempMax[c]); //saves max by comparing old max with temporary max
 			}
-		}return max;
+			horizontal[r]=max;	//saves all the horizontal max in an array
+		}
+		for (int i = 0; i < horizontal.length; i++) {
+			if (maxSumH < horizontal[i]) {
+				maxSumH = horizontal[i];
+			}
+		}
+		//compares all the horizontal max and returns the biggest
+		return maxSumH;
 	}
 	
 	private int maxSumVertical(int[][] input, int rows, int columns) {
-		// TODO Auto-generated method stub
-		return 0;
+    	int maxSumV=0;		// initialize maxSum vertical with value 0
+    	int [] vertical = new int[rows];	//make a vertical array where you save the Max values
+		int [] tempMax = new int[rows];		//Mmke a temporary array where you save the result
+		
+		//loop through matrix
+		for(int c=0; c<columns; c++){
+			int max=0;	//for every column initialize new max 
+			tempMax[0] = Math.max(input[0][c],0);	//for every first element of every check, check max compared to 0
+			max=tempMax[0];
+			for (int r=1; r<rows; r++){
+				tempMax [r]=Math.max(0, tempMax[r-1]+input[r][c]); // from row 1 to last row (nested for loop n^2), save subresult in temporary array(dynamic)
+				max=Math.max(max,tempMax[r]);	//saves max by comparing old max with temporary max
+			}
+			vertical[c]=max; //saves all the vertical max in an array
+		}
+		for (int i = 0; i < vertical.length; i++) {
+			if (maxSumV < vertical[i]) {
+				maxSumV = vertical[i];
+			}
+		}
+		//compares all the vertical max and returns the biggest
+		return maxSumV;
 	}
 
-    private int maxSumDiagonal(int[][] input, int rows, int columns) {
+    private int maxSumDiagonal(int[][] input, int rows, int columns) {		
+    	int maxSumD=0;
+    	int [] diagonal = new int[rows+columns-1];//There can be at most  n + n -1 diagonals to be printed
+		int [] tempMax = new int[rows+1];
+		int counter=0;		//counter to save all max diagonals in the diagonal array
 		
-		return 0;
+		
+		//split the looping problem in two halves
+		for(int r=0; r<rows; r++){		//top half
+			int max=0;
+			tempMax[0] = 0;
+			for (int c=0; c<=r; c++){
+				int i=r-c;
+				tempMax [c+1]=Math.max(0, tempMax[c]+input[i][c]);
+				max=Math.max(max,tempMax[c+1]);
+			}
+			diagonal[counter]=max;	// save the top half diagonal max in an array
+			counter++;
+		}
+		
+		for(int r=rows-1; r>0; r--){	//lower half
+			int max=0;
+			int counter2=0;
+			tempMax[0] = 0;
+			for (int c=columns-1, j=0; r<=c; c--, j++){
+				int i=r+j;
+				tempMax[counter2+1]=Math.max(0, tempMax[counter2]+input[i][c]);
+				max=Math.max(max,tempMax[counter2+1]);
+				counter2++;
+			}
+			diagonal[counter]=max;	// save the lower half diagonal max in an array
+			counter++;
+		}
+		
+		//compares the max values in the diagonal array and returns the biggest
+		for (int i = 0; i < diagonal.length; i++) {
+			if (maxSumD < diagonal[i]) {
+				maxSumD = diagonal[i];
+			}
+		} 	
+    	return maxSumD;
 	}
     
-	private int maxSumAntiDiagonal(int[][] input, int rows, int columns) {
-		// TODO Auto-generated method stub
-		return 0;
+	private int maxSumADiagonal(int[][] input, int rows, int columns) {
+    	int maxSumA=0;
+    	int [] adiagonal = new int[rows+columns-1]; //There can be at most  rows + columns -1 diagonals to go through
+		int [] tempMax = new int[rows+1];
+		int counter=0;
+		
+		//split the looping problem in two halves
+		for(int r=rows-1; r>0; r--){	//lower half
+			int max=0;
+			tempMax[0] = 0;
+			for (int c=0, x=r; x<=rows-1; c++, x++){
+				tempMax [c+1]=Math.max(0, tempMax[c]+input[x][c]);
+				max=Math.max(max,tempMax[c+1]);
+			}
+			adiagonal[counter]=max;
+			counter++;
+		}
+		
+		for(int r=0; r<=rows-1; r++){	//top half
+			int max=0;
+			tempMax[0] = 0;
+			for (int c=0, y=r; y<=rows-1; c++, y++){
+				tempMax [c+1]=Math.max(0, tempMax[c]+input[c][y]);
+				max=Math.max(max,tempMax[c+1]);
+			}
+			adiagonal[counter]=max;	// save the top half adiagonal max in an array
+			counter++;
+		}
+		
+		//compares the max values in the adiagonal array and returns the biggest 
+		for (int i = 0; i < adiagonal.length; i++) {
+			if (maxSumA < adiagonal[i]) {
+				maxSumA = adiagonal[i];
+			}
+		}
+		return maxSumA;
 	}
 
 
